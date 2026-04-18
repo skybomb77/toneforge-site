@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>創作 — ToneForge 音鍛</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root { --bg:#0a0a0f; --panel:#12121a; --border:#1e1e2e; --text:#eee; --muted:#888; --accent:#f59e0b; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif; background:var(--bg); color:var(--text); }
+        a { color:var(--accent); text-decoration:none; }
+        .nav { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--border); }
+        .nav .logo { font-weight:700; cursor:pointer; }
+        .usage { font-size:.85rem; color:var(--muted); }
+        .usage strong { color:var(--accent); }
+        .badge { font-size:.65rem; font-weight:700; padding:3px 8px; border-radius:999px; background:rgba(245,158,11,.15); color:var(--accent); border:1px solid rgba(245,158,11,.3); }
+        .main { display:grid; grid-template-columns:380px 1fr; gap:24px; max-width:1200px; margin:0 auto; padding:24px; }
+        .panel { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; }
+        .panel h3 { font-size:.95rem; margin-bottom:14px; }
+        .panel h3 i { color:var(--accent); margin-right:6px; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px; }
+        .form-group textarea, .form-group select { width:100%; background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:8px; padding:10px; color:#fff; font-size:.9rem; outline:none; }
+        .form-group textarea { resize:vertical; min-height:80px; }
+        .form-group textarea:focus, .form-group select:focus { border-color:var(--accent); }
+        .genre-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:16px; }
+        .genre-opt { padding:12px 8px; background:rgba(0,0,0,.2); border:1px solid var(--border); border-radius:8px; text-align:center; cursor:pointer; font-size:.8rem; transition:all .2s; }
+        .genre-opt:hover { border-color:var(--accent); }
+        .genre-opt.sel { border-color:var(--accent); background:rgba(245,158,11,.08); }
+        .genre-opt .emoji { font-size:1.5rem; display:block; margin-bottom:4px; }
+        .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+        .slider-row input[type=range] { flex:1; accent-color:var(--accent); }
+        .slider-val { font-size:.85rem; color:var(--accent); min-width:35px; text-align:right; }
+        .gen-btn { width:100%; padding:14px; background:var(--accent); color:#0a0a0f; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; }
+        .gen-btn:hover { background:#e08e00; }
+        .gen-btn:disabled { opacity:.5; cursor:not-allowed; }
+        .result { min-height:400px; }
+        .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+        .empty i { font-size:3rem; opacity:.3; display:block; margin-bottom:12px; }
+        .spin { animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .music-card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:12px; }
+        .music-card .title { font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+        .music-card audio { width:100%; margin-bottom:8px; }
+        .music-card .meta { font-size:.8rem; color:var(--muted); }
+        .download-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3); border-radius:8px; color:var(--accent); cursor:pointer; font-size:.85rem; margin-top:8px; text-decoration:none; }
+        .download-btn:hover { background:rgba(245,158,11,.25); }
+        @media(max-width:768px) { .main { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<nav class="nav">
+    <div class="logo" onclick="location.href='index.html'">🎵 ToneForge 音鍛</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+        <span class="usage" id="usageDisplay"><strong>10</strong>/10 首可用</span>
+        <span class="badge">FREE</span>
+    </div>
+</nav>
+
+<div class="main">
+    <div>
+        <div class="panel" style="margin-bottom:14px;">
+            <h3><i class="fa-solid fa-music"></i> 音樂設定</h3>
+            <div class="form-group">
+                <label>描述你想要的音樂</label>
+                <textarea id="prompt" placeholder="例如：歡快的廣告配樂，帶有鋼琴和弦樂，節奏輕快明亮"></textarea>
+            </div>
+            <label style="font-size:.85rem;color:var(--muted);display:block;margin-bottom:8px;">選擇風格</label>
+            <div class="genre-grid" id="genreGrid">
+                <div class="genre-opt sel" data-genre="pop"><span class="emoji">🎵</span>流行</div>
+                <div class="genre-opt" data-genre="rock"><span class="emoji">🎸</span>搖滾</div>
+                <div class="genre-opt" data-genre="classical"><span class="emoji">🎹</span>古典</div>
+                <div class="genre-opt" data-genre="jazz"><span class="emoji">🎷</span>爵士</div>
+                <div class="genre-opt" data-genre="electronic"><span class="emoji">🎧</span>電子</div>
+                <div class="genre-opt" data-genre="orchestral"><span class="emoji">🎻</span>管弦樂</div>
+                <div class="genre-opt" data-genre="hiphop"><span class="emoji">🥁</span>嘻哈</div>
+                <div class="genre-opt" data-genre="ambient"><span class="emoji">🌿</span>環境</div>
+            </div>
+            <div class="form-group">
+                <label>時長</label>
+                <div class="slider-row">
+                    <input type="range" id="duration" min="5" max="30" value="10" step="5">
+                    <span class="slider-val" id="durationVal">10s</span>
+                </div>
+            </div>
+            <button class="gen-btn" id="genBtn" onclick="generate()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 生成配樂
+            </button>
+        </div>
+    </div>
+
+    <div class="result" id="resultArea">
+        <div class="empty">
+            <i class="fa-solid fa-headphones"></i>
+            <p>輸入描述，開始創作你的配樂</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '';  // Same-origin or set to backend URL
+let selectedGenre = 'pop';
+
+document.getElementById('duration').addEventListener('input', e => {
+    document.getElementById('durationVal').textContent = e.target.value + 's';
+});
+
+document.querySelectorAll('.genre-opt').forEach(el => {
+    el.addEventListener('click', () => {
+        document.querySelectorAll('.genre-opt').forEach(x => x.classList.remove('sel'));
+        el.classList.add('sel');
+        selectedGenre = el.dataset.genre;
+    });
+});
+
+async function generate() {
+    const prompt = document.getElementById('prompt').value.trim();
+    if (!prompt) return alert('請輸入音樂描述');
+    
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> 生成中...';
+    
+    document.getElementById('resultArea').innerHTML = '<div class="empty"><i class="fa-solid fa-spinner spin" style="font-size:2rem;"></i><p style="margin-top:12px;">AI 正在作曲，請稍候...</p></div>';
+    
+    try {
+        const duration = parseInt(document.getElementById('duration').value);
+        const res = await fetch(API + '/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, genre: selectedGenre, duration })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            showResult(data);
+        } else {
+            showError(data.error || '生成失敗');
+        }
+    } catch (err) {
+        showError('連線失敗: ' + err.message);
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 生成配樂';
+}
+
+function showResult(data) {
+    const audioUrl = data.audio_url || data.url;
+    document.getElementById('resultArea').innerHTML = `
+        <div class="music-card">
+            <div class="title"><i class="fa-solid fa-music" style="color:var(--accent);"></i> ${data.title || 'AI 生成配樂'}</div>
+            <audio controls src="${audioUrl}"></audio>
+            <div class="meta">風格: ${selectedGenre} · 時長: ${data.duration || '10s'}</div>
+            <a href="${audioUrl}" download class="download-btn"><i class="fa-solid fa-download"></i> 下載 MP3</a>
+        </div>
+    `;
+}
+
+function showError(msg) {
+    document.getElementById('resultArea').innerHTML = `<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><p>${msg}</p></div>`;
+}
+</script>
+</body>
+</html>

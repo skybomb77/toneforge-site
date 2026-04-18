@@ -98,8 +98,9 @@
     </div>
 </div>
 
+<script src="config.js"></script>
 <script>
-const API = '';  // Same-origin or set to backend URL
+const API = CONFIG.api;  // Same-origin or set to backend URL
 let selectedGenre = 'pop';
 
 document.getElementById('duration').addEventListener('input', e => {

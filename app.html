@@ -127,10 +127,9 @@ async function generate() {
     
     try {
         const duration = parseInt(document.getElementById('duration').value);
-        const res = await fetch(API + '/api/generate', {
+        const res = await apiFetch(API + '/api/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, genre: selectedGenre, duration })
+            body: { prompt, genre: selectedGenre, duration }
         });
         const data = await res.json();
         

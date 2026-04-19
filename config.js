@@ -1,6 +1,6 @@
 // ToneForge 配置
 const CONFIG = {
-    api: "http://localhost:5001",
+    api: "https://interstaminal-unvirtuously-gennie.ngrok-free.dev/toneforge",
     name: "ToneForge",
     version: "1.0.0"
 };
